@@ -39,7 +39,7 @@ def process(file, **kwargs):
         sys.exit(2)
     for sentence in doc.sentences():
         text = sentence.text(retaintokenisation=True)
-        entities = spotlight.annotate(kwargs.get('server'),"rest", text, confidence=kwargs.get('confidence',0.5))
+        entities = spotlight.annotate(os.path.join(kwargs.get('server'),"annotate"), text, confidence=kwargs.get('confidence',0.5))
         for rawentity in entities:
             try:
                 wordspan = sentence.resolveoffsets(rawentity['offset'], rawentity['offset'] + len(rawentity['surfaceForm']))
@@ -75,7 +75,7 @@ def process(file, **kwargs):
 
 def main():
     parser = argparse.ArgumentParser(description="", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-s','--server', type=str,help="The URL to the spotlight webservice", action='store',default="http://demo.dbpedia-spotlight.org",required=False)
+    parser.add_argument('-s','--server', type=str,help="The URL to the spotlight webservice", action='store',default="http://api.dbpedia-spotlight.org/en",required=False)
     parser.add_argument('-m','--mode', type=int, help="Select a mode: 1) Directly assign individual classes, linking directly to the named entity 2) Assign broad named entity classes (person, location, etc..) and add a relation link to the specific entity resource", action='store',default=1)
     parser.add_argument('-c','--confidence', type=float, help="Confidence threshold", action='store',default=0.5)
     parser.add_argument('-M','--metrics', help="Add metrics (similarity score, support)", action='store_true')
