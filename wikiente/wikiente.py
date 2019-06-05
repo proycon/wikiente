@@ -10,6 +10,7 @@ import os.path
 import argparse
 import spotlight
 import folia.main as folia
+from wikiente import VERSION
 
 METRIC_SET = "https://raw.githubusercontent.com/proycon/folia/master/setdefinitions/spotlight/metrics.foliaset.ttl"
 ENTITYSET_MODE_1 = "https://raw.githubusercontent.com/proycon/folia/master/setdefinitions/spotlight/dbpedia.foliaset.ttl"
@@ -17,30 +18,34 @@ ENTITYSET_MODE_2 = "https://raw.githubusercontent.com/proycon/folia/master/setde
 RELATIONSET = "https://raw.githubusercontent.com/proycon/folia/master/setdefinitions/babelente.relations.ttl" #same as babelente
 
 def getclass(types):
-    if 'dbpedia:Place' in types or 'dbpedia:Location' in types:
+    if 'DBpedia:Place' in types or 'DBpedia:Location' in types:
         return "loc"
-    elif 'dbpedia:Person' in types:
+    elif 'DBpedia:Person' in types:
         return "per"
-    elif 'dbpedia:Event' in types:
+    elif 'DBpedia:Event' in types:
         return "eve"
-    elif 'dbpedia:Product' in types:
+    elif 'DBpedia:Product' in types:
         return "prod"
-    elif 'dbpedia:Time' in types:
+    elif 'DBpedia:Time' in types:
         return "time"
-    elif 'dbpedia:Organization' in types:
+    elif 'DBpedia:Organization' in types:
         return "org"
     return None
 
 
 def process(file, **kwargs):
-    doc = folia.Document(file=file)
+    doc = folia.Document(file=file, processor=folia.Processor.create("wikiente",version=VERSION))
     if not doc.declared(folia.Sentence):
         print("ERROR: Document contains no sentence annotation, but this is required for wikiente",file=sys.stderr)
         sys.exit(2)
     for sentence in doc.sentences():
         text = sentence.text(retaintokenisation=True)
+        if kwargs.get('debug'):
+            print("Processing: ", text,file=sys.stderr)
         entities = spotlight.annotate(os.path.join(kwargs.get('server'),"annotate"), text, confidence=kwargs.get('confidence',0.5))
         for rawentity in entities:
+            if kwargs.get('debug'):
+                print(rawentity,file=sys.stderr)
             try:
                 wordspan = sentence.resolveoffsets(rawentity['offset'], rawentity['offset'] + len(rawentity['surfaceForm']))
             except folia.InconsistentText as e:
@@ -55,7 +60,7 @@ def process(file, **kwargs):
                 elif mode == 2:
                     cls = getclass(rawentity['types'].split(','))
                     if cls is None:
-                        print("WARNING: Resolved entity does not specify any types, skipping: ", rawentity['surfaceForm'],file=sys.stderr)
+                        print("WARNING: Resolved entity does not specify any known types, skipping: ", rawentity['surfaceForm'],file=sys.stderr)
                         continue
                     entityset = ENTITYSET_MODE_2
                 else:
@@ -80,6 +85,7 @@ def main():
     parser.add_argument('-c','--confidence', type=float, help="Confidence threshold", action='store',default=0.5)
     parser.add_argument('-M','--metrics', help="Add metrics (similarity score, support)", action='store_true')
     parser.add_argument('-o','--output', help="Output to the specified file (only makes sense for one input file), use '-' for stdout", action='store')
+    parser.add_argument('-d','--debug', help="Debug", action='store_true')
     parser.add_argument('files', nargs='+', help='Input files (FoLiA XML)')
     args = parser.parse_args()
     for file in args.files:
