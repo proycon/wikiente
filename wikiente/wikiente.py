@@ -20,15 +20,15 @@ RELATIONSET = "https://raw.githubusercontent.com/proycon/folia/master/setdefinit
 def getclass(types):
     if 'DBpedia:Place' in types or 'DBpedia:Location' in types:
         return "loc"
-    elif 'DBpedia:Person' in types:
+    if 'DBpedia:Person' in types:
         return "per"
-    elif 'DBpedia:Event' in types:
+    if 'DBpedia:Event' in types:
         return "eve"
-    elif 'DBpedia:Product' in types:
+    if 'DBpedia:Product' in types:
         return "prod"
-    elif 'DBpedia:Time' in types:
+    if 'DBpedia:Time' in types:
         return "time"
-    elif 'DBpedia:Organization' in types:
+    if 'DBpedia:Organization' in types:
         return "org"
     return None
 
@@ -93,4 +93,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
