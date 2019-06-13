@@ -42,7 +42,10 @@ def process(file, **kwargs):
         text = sentence.text(retaintokenisation=True)
         if kwargs.get('debug'):
             print("Processing: ", text,file=sys.stderr)
-        entities = spotlight.annotate(os.path.join(kwargs.get('server'),"annotate"), text, confidence=kwargs.get('confidence',0.5))
+        try:
+            entities = spotlight.annotate(os.path.join(kwargs.get('server'),"annotate"), text, confidence=kwargs.get('confidence',0.5))
+        except spotlight.SpotlightException as e:
+            print("WARNING: Spot exceptions", str(e),file=sys.stderr)
         for rawentity in entities:
             if kwargs.get('debug'):
                 print(rawentity,file=sys.stderr)
