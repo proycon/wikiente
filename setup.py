@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name = "WikiEnte",
-    version = "0.1.0", #also edit in __init__.py
+    version = "0.2.0", #also edit in __init__.py
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Entity extraction using DBPedia through spotlight"),
