@@ -34,7 +34,7 @@ def getclass(types):
 
 def getlanguage(element):
     try:
-        return element.getannotation(folia.LangAnnotation)
+        return element.annotation(folia.LangAnnotation)
     except folia.NoSuchAnnotation:
         if element.parent:
             return getlanguage(element.parent)
