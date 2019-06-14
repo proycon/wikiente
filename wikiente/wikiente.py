@@ -32,13 +32,25 @@ def getclass(types):
         return "org"
     return None
 
+def getlanguage(element):
+    try:
+        return element.getannotation(folia.LangAnnotation)
+    except folia.NoSuchAnnotation:
+        if element.parent:
+            return getlanguage(element.parent)
+        else:
+            return None
 
 def process(file, **kwargs):
+    selectlang = kwargs.get('language',None)
     doc = folia.Document(file=file, processor=folia.Processor.create("wikiente",version=VERSION))
     if not doc.declared(folia.Sentence):
         print("ERROR: Document contains no sentence annotation, but this is required for wikiente",file=sys.stderr)
         sys.exit(2)
     for sentence in doc.sentences():
+        if selectlang:
+            if getlanguage(sentence) != selectlang:
+                continue
         text = sentence.text(retaintokenisation=True)
         if kwargs.get('debug'):
             print("Processing: ", text,file=sys.stderr)
@@ -87,6 +99,7 @@ def main():
     parser.add_argument('-s','--server', type=str,help="The URL to the spotlight webservice", action='store',default="http://api.dbpedia-spotlight.org/en",required=False)
     parser.add_argument('-m','--mode', type=int, help="Select a mode: 1) Directly assign individual classes, linking directly to the named entity 2) Assign broad named entity classes (person, location, etc..) and add a relation link to the specific entity resource", action='store',default=1)
     parser.add_argument('-c','--confidence', type=float, help="Confidence threshold", action='store',default=0.5)
+    parser.add_argument('-l','--language', type=str, help="Apply only to elements classified as being in this language", action='store')
     parser.add_argument('-M','--metrics', help="Add metrics (similarity score, support)", action='store_true')
     parser.add_argument('-o','--output', help="Output to the specified file (only makes sense for one input file), use '-' for stdout", action='store')
     parser.add_argument('-d','--debug', help="Debug", action='store_true')
