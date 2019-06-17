@@ -52,8 +52,11 @@ def process(file, **kwargs):
             print("Processing sentence ", sentence.id,file=sys.stderr)
         if selectlang:
             foundlang = getlanguage(sentence)
-            if foundlang is None or foundlang.cls != selectlang:
-                print("(skipping, language doesn't match)",file=sys.stderr)
+            if foundlang is None:
+                print("(no language information, skipping sentence ", repr(sentence),")",file=sys.stderr)
+                continue
+            elif foundlang.cls != selectlang:
+                print("(skipping, language doesn't match, expected ",selectlang," found ", foundlang.cls, file=sys.stderr)
                 continue
         text = sentence.text(retaintokenisation=True)
         if kwargs.get('debug'):
