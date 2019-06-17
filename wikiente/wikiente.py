@@ -48,8 +48,12 @@ def process(file, **kwargs):
         print("ERROR: Document contains no sentence annotation, but this is required for wikiente",file=sys.stderr)
         sys.exit(2)
     for sentence in doc.sentences():
+        if kwargs.get('debug') and sentence.id:
+            print("Processing sentence ", sentence.id,file=sys.stderr)
         if selectlang:
-            if getlanguage(sentence) != selectlang:
+            foundlang = getlanguage(sentence)
+            if foundlang is None or foundlang.cls != selectlang:
+                print("(skipping, language doesn't match)",file=sys.stderr)
                 continue
         text = sentence.text(retaintokenisation=True)
         if kwargs.get('debug'):
