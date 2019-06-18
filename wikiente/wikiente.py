@@ -10,6 +10,7 @@ import os.path
 import argparse
 import spotlight
 import folia.main as folia
+from requests.exceptions import HTTPError
 from wikiente import VERSION
 
 METRIC_SET = "https://raw.githubusercontent.com/proycon/folia/master/setdefinitions/spotlight/metrics.foliaset.ttl"
@@ -66,6 +67,12 @@ def process(file, **kwargs):
         except spotlight.SpotlightException as e:
             print("WARNING: Spot exceptions", str(e),file=sys.stderr)
             continue
+        except HTTPError as e:
+            print("ERROR: HTTP exception", str(e),file=sys.stderr)
+            if kwargs.get('ignore'):
+                continue
+            else:
+                sys.exit(2)
         for rawentity in entities:
             if kwargs.get('debug'):
                 print(rawentity,file=sys.stderr)
@@ -109,6 +116,7 @@ def main():
     parser.add_argument('-l','--language', type=str, help="Apply only to elements classified as being in this language", action='store')
     parser.add_argument('-M','--metrics', help="Add metrics (similarity score, support)", action='store_true')
     parser.add_argument('-o','--output', help="Output to the specified file (only makes sense for one input file), use '-' for stdout", action='store')
+    parser.add_argument('-i','--ignore', help="Ignore HTTP errors", action='store_true')
     parser.add_argument('-d','--debug', help="Debug", action='store_true')
     parser.add_argument('files', nargs='+', help='Input files (FoLiA XML)')
     args = parser.parse_args()
