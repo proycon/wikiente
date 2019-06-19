@@ -59,7 +59,7 @@ def process(file, **kwargs):
             elif foundlang.cls != selectlang:
                 print("(skipping, language doesn't match, expected ",selectlang," found ", foundlang.cls, file=sys.stderr)
                 continue
-        text = sentence.text(retaintokenisation=True)
+        text = sentence.text(cls=kwargs.get('textclass','current'),retaintokenisation=True)
         if kwargs.get('debug'):
             print("Processing: ", text,file=sys.stderr)
         try:
@@ -78,7 +78,7 @@ def process(file, **kwargs):
                 print(rawentity,file=sys.stderr)
             wordspan = None
             try:
-                wordspan = sentence.resolveoffsets(rawentity['offset'], rawentity['offset'] + len(rawentity['surfaceForm']))
+                wordspan = sentence.resolveoffsets(rawentity['offset'], rawentity['offset'] + len(rawentity['surfaceForm']), cls=kwargs.get('textclass','current') )
             except folia.InconsistentText as e:
                 print("WARNING: ", str(e),file=sys.stderr)
             if not wordspan:
@@ -115,6 +115,7 @@ def main():
     parser.add_argument('-m','--mode', type=int, help="Select a mode: 1) Directly assign individual classes, linking directly to the named entity 2) Assign broad named entity classes (person, location, etc..) and add a relation link to the specific entity resource", action='store',default=1)
     parser.add_argument('-c','--confidence', type=float, help="Confidence threshold", action='store',default=0.5)
     parser.add_argument('-l','--language', type=str, help="Apply only to elements classified as being in this language", action='store')
+    parser.add_argument('-T','--textclass', type=str, help="Use the specified text class (default: current)", action='store', default="current")
     parser.add_argument('-M','--metrics', help="Add metrics (similarity score, support)", action='store_true')
     parser.add_argument('-o','--output', help="Output to the specified file (only makes sense for one input file), use '-' for stdout", action='store')
     parser.add_argument('-i','--ignore', help="Ignore HTTP errors", action='store_true')
