@@ -65,7 +65,7 @@ def process(file, **kwargs):
         try:
             entities = spotlight.annotate(os.path.join(kwargs.get('server'),"annotate"), text, confidence=kwargs.get('confidence',0.5))
         except spotlight.SpotlightException as e:
-            print("WARNING: Spot exceptions", str(e),file=sys.stderr)
+            print("WARNING: Spot exception", str(e),file=sys.stderr)
             continue
         except HTTPError as e:
             print("ERROR: HTTP exception", str(e),file=sys.stderr)
