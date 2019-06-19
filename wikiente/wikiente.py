@@ -76,6 +76,7 @@ def process(file, **kwargs):
         for rawentity in entities:
             if kwargs.get('debug'):
                 print(rawentity,file=sys.stderr)
+            wordspan = None
             try:
                 wordspan = sentence.resolveoffsets(rawentity['offset'], rawentity['offset'] + len(rawentity['surfaceForm']))
             except folia.InconsistentText as e:
