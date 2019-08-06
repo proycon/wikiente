@@ -10,7 +10,7 @@ import os.path
 import argparse
 import spotlight
 import folia.main as folia
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, ConnectionError
 from wikiente import VERSION
 
 METRIC_SET = "https://raw.githubusercontent.com/proycon/folia/master/setdefinitions/spotlight/metrics.foliaset.ttl"
@@ -64,6 +64,12 @@ def process(file, **kwargs):
             print("Processing: ", text,file=sys.stderr)
         try:
             entities = spotlight.annotate(os.path.join(kwargs.get('server'),"annotate"), text, confidence=kwargs.get('confidence',0.5))
+        except ConnectionError as e:
+            print("WARNING: Connection Error", str(e),file=sys.stderr)
+            if kwargs.get('ignore'):
+                continue
+            else:
+                sys.exit(2)
         except spotlight.SpotlightException as e:
             print("WARNING: Spot exception", str(e),file=sys.stderr)
             continue
